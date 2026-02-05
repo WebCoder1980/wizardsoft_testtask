@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using wizardsoft_testtask.Dtos;
 using wizardsoft_testtask.Exceptions;
 
 namespace wizardsoft_testtask.Middleware
@@ -54,8 +55,9 @@ namespace wizardsoft_testtask.Middleware
                 code = "internal_error";
                 message = "Internal server error";
             }
+
             context.Response.StatusCode = statusCode;
-            object response = new { code, message };
+            ErrorDto response = new ErrorDto(code, message);
             string json = JsonSerializer.Serialize(response);
             return context.Response.WriteAsync(json);
         }
