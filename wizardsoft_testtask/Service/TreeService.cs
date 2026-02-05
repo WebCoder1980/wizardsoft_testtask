@@ -14,6 +14,21 @@ namespace wizardsoft_testtask.Service
             _db = db;
         }
 
+        public async Task<TreeNodeResponse?> GetAsync(long id, CancellationToken cancellationToken)
+        {
+            var node = await _db.TreeNodes
+                .AsNoTracking()
+                .Include(x => x.Children)
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (node == null)
+            {
+                return null;
+            }
+
+            return await BuildTree(node, cancellationToken);
+        }
+
         public async Task<IReadOnlyCollection<TreeNodeResponse>> ExportAsync(CancellationToken cancellationToken)
         {
             return await GetRootsAsync(cancellationToken);

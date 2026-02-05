@@ -15,6 +15,18 @@ namespace wizardsoft_testtask.Controllers
             _service = service;
         }
 
+        [HttpGet("{id:long}")]
+        public async Task<ActionResult<TreeNodeResponse>> GetById(long id, CancellationToken cancellationToken)
+        {
+            var node = await _service.GetAsync(id, cancellationToken);
+            if (node == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(node);
+        }
+
         [HttpGet("export")]
         public async Task<ActionResult<IEnumerable<TreeNodeResponse>>> Export(CancellationToken cancellationToken)
         {
