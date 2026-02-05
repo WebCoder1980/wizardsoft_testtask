@@ -17,6 +17,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SupportNonNullableReferenceTypes();
+
     var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
