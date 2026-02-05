@@ -34,7 +34,20 @@ namespace wizardsoft_testtask.Service
             return await GetRootsAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyCollection<TreeNodeResponse>> GetRootsAsync(CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<TreeNodeRootResponse>> GetRootsWithChildrenIdAsync(CancellationToken cancellationToken)
+        {
+            var result = await GetRootsAsync(cancellationToken);
+
+            return result
+                .Select(x => new TreeNodeRootResponse(
+                    x.Id,
+                    x.Name, 
+                    x.ParentId,
+                    x.Children.Select(y => y.Id).ToList()))
+                .ToList();
+        }
+
+        private async Task<IReadOnlyCollection<TreeNodeResponse>> GetRootsAsync(CancellationToken cancellationToken)
         {
             var roots = await _db.TreeNodes
                 .Where(x => x.ParentId == null)

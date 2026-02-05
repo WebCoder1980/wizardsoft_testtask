@@ -27,11 +27,20 @@ namespace wizardsoft_testtask.Controllers
             return Ok(node);
         }
 
+        [HttpGet("roots")]
+        public async Task<ActionResult<IEnumerable<TreeNodeRootResponse>>> GetRoots(CancellationToken cancellationToken)
+        {
+            var roots = await _service.GetRootsWithChildrenIdAsync(cancellationToken);
+            return Ok(roots);
+        }
+
         [HttpGet("export")]
         public async Task<ActionResult<IEnumerable<TreeNodeResponse>>> Export(CancellationToken cancellationToken)
         {
             var tree = await _service.ExportAsync(cancellationToken);
             return Ok(tree);
         }
+
+
     }
 }
