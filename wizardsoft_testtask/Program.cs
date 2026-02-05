@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using wizardsoft_testtask.Data;
 using wizardsoft_testtask.Dtos;
+using wizardsoft_testtask.Middleware;
 using wizardsoft_testtask.Service;
 using wizardsoft_testtask.Service.Auth;
 
@@ -78,7 +79,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +8,7 @@ using System.Text;
 using wizardsoft_testtask.Constants;
 using wizardsoft_testtask.Data;
 using wizardsoft_testtask.Dtos;
+using wizardsoft_testtask.Exceptions;
 using wizardsoft_testtask.Models;
 
 namespace wizardsoft_testtask.Service.Auth
@@ -27,13 +28,13 @@ namespace wizardsoft_testtask.Service.Auth
             var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == request.UserName);
             if (user == null)
             {
-                return null;
+                throw new InvalidCredentialsException();
             }
 
             var passwordHash = AuthUtil.HashPassword(request.Password);
             if (!string.Equals(user.PasswordHash, passwordHash, StringComparison.Ordinal))
             {
-                return null;
+                throw new InvalidCredentialsException();
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -66,7 +67,7 @@ namespace wizardsoft_testtask.Service.Auth
             var exists = await _dbContext.Users.AnyAsync(x => x.UserName == request.UserName);
             if (exists)
             {
-                return null;
+                throw new UserAlreadyExistsException();
             }
 
             var user = new User
