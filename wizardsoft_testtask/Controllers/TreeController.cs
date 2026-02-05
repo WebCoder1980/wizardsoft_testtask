@@ -17,6 +17,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpGet("{id:long}")]
+        [Authorize]
         public async Task<ActionResult<TreeNodeResponse>> GetById(long id, CancellationToken cancellationToken)
         {
             var node = await _service.GetAsync(id, cancellationToken);
@@ -29,6 +30,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpGet("roots")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TreeNodeRootResponse>>> GetRoots(CancellationToken cancellationToken)
         {
             var roots = await _service.GetRootsWithChildrenIdAsync(cancellationToken);
@@ -36,6 +38,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpGet("export")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TreeNodeResponse>>> Export(CancellationToken cancellationToken)
         {
             var tree = await _service.ExportAsync(cancellationToken);
@@ -43,6 +46,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TreeNodeResponse>> Create(TreeNodeCreateRequest request, CancellationToken cancellationToken)
         {
             var created = await _service.CreateAsync(request, cancellationToken);
@@ -50,6 +54,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpPut("{id:long}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TreeNodeResponse>> Update(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken)
         {
             var updated = await _service.UpdateAsync(id, request, cancellationToken);
@@ -62,6 +67,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpDelete("{id:long}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
             var deleted = await _service.DeleteAsync(id, cancellationToken);
