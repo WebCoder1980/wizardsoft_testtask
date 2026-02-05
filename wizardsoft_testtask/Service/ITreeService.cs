@@ -8,5 +8,6 @@ namespace wizardsoft_testtask.Service
         Task<TreeNodeResponse?> GetAsync(long id, CancellationToken cancellationToken);
         Task<IReadOnlyCollection<TreeNodeResponse>> ExportAsync(CancellationToken cancellationToken);
         Task<IReadOnlyCollection<TreeNodeRootResponse>> GetRootsWithChildrenIdAsync(CancellationToken cancellationToken);
+        Task<TreeNodeResponse?> UpdateAsync(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken);
     }
 }

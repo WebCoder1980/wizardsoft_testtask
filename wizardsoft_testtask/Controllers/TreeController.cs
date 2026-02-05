@@ -41,6 +41,16 @@ namespace wizardsoft_testtask.Controllers
             return Ok(tree);
         }
 
+        [HttpPut("{id:long}")]
+        public async Task<ActionResult<TreeNodeResponse>> Update(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken)
+        {
+            var updated = await _service.UpdateAsync(id, request, cancellationToken);
+            if (updated == null)
+            {
+                return NotFound();
+            }
 
+            return Ok(updated);
+        }
     }
 }

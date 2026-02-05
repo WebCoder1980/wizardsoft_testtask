@@ -47,6 +47,54 @@ namespace wizardsoft_testtask.Service
                 .ToList();
         }
 
+        public async Task<TreeNodeResponse?> UpdateAsync(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken)
+        {
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            var node = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (node == null)
+            {
+                return null;
+            }
+
+            if (request.ParentId.HasValue)
+            {
+                if (request.ParentId.Value == id)
+                {
+                    throw new InvalidOperationException("Node cannot be its own parent");
+                }
+
+                var newParent = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == request.ParentId.Value, cancellationToken);
+                if (newParent == null)
+                {
+                    throw new InvalidOperationException("Parent not found");
+                }
+
+                if (await IsDescendantAsync(newParent.Id, node.Id, cancellationToken))
+                {
+                    throw new InvalidOperationException("Cyclic hierarchy is not allowed");
+                }
+
+                node.ParentId = newParent.Id;
+            }
+            else
+            {
+                node.ParentId = null;
+            }
+
+            node.Name = request.Name;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            var reloaded = await _db.TreeNodes
+                .AsNoTracking()
+                .Include(x => x.Children)
+                .FirstAsync(x => x.Id == id, cancellationToken);
+
+            return await BuildTree(reloaded, cancellationToken);
+        }
+
         private async Task<IReadOnlyCollection<TreeNodeResponse>> GetRootsAsync(CancellationToken cancellationToken)
         {
             var roots = await _db.TreeNodes
@@ -77,6 +125,22 @@ namespace wizardsoft_testtask.Service
             }
 
             return new TreeNodeResponse(node.Id, node.Name, node.ParentId, childResponses);
+        }
+
+        private async Task<bool> IsDescendantAsync(long nodeId, long potentialAncestorId, CancellationToken cancellationToken)
+        {
+            var current = await _db.TreeNodes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == nodeId, cancellationToken);
+            while (current != null && current.ParentId.HasValue)
+            {
+                if (current.ParentId.Value == potentialAncestorId)
+                {
+                    return true;
+                }
+
+                current = await _db.TreeNodes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == current.ParentId.Value, cancellationToken);
+            }
+
+            return false;
         }
     }
 }
