@@ -60,5 +60,17 @@ namespace wizardsoft_testtask.Controllers
 
             return Ok(updated);
         }
+
+        [HttpDelete("{id:long}")]
+        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        {
+            var deleted = await _service.DeleteAsync(id, cancellationToken);
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
     }
 }

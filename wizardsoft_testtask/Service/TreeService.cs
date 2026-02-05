@@ -122,6 +122,27 @@ namespace wizardsoft_testtask.Service
             return await BuildTree(reloaded, cancellationToken);
         }
 
+        public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken)
+        {
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            var node = await _db.TreeNodes
+                .Include(x => x.Children)
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (node == null)
+            {
+                return false;
+            }
+
+            await DeleteSubtree(node, cancellationToken);
+
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return true;
+        }
+
         private async Task<IReadOnlyCollection<TreeNodeResponse>> GetRootsAsync(CancellationToken cancellationToken)
         {
             var roots = await _db.TreeNodes
@@ -168,6 +189,19 @@ namespace wizardsoft_testtask.Service
             }
 
             return false;
+        }
+        private async Task DeleteSubtree(TreeNode node, CancellationToken cancellationToken)
+        {
+            var children = await _db.TreeNodes
+                .Where(x => x.ParentId == node.Id)
+                .ToListAsync(cancellationToken);
+
+            foreach (var child in children)
+            {
+                await DeleteSubtree(child, cancellationToken);
+            }
+
+            _db.TreeNodes.Remove(node);
         }
     }
 }
