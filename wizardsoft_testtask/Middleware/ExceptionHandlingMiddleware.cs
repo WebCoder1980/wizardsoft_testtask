@@ -49,6 +49,18 @@ namespace wizardsoft_testtask.Middleware
                 code = ((AuthException)exception).Code;
                 message = exception.Message;
             }
+            else if (exception is CircleInTreeException)
+            {
+                statusCode = (int)HttpStatusCode.BadRequest;
+                code = ((AuthException)exception).Code;
+                message = exception.Message;
+            }
+            else if (exception is InvalidDataException)
+            {
+                statusCode = (int)HttpStatusCode.BadRequest;
+                code = ((AuthException)exception).Code;
+                message = exception.Message;
+            }
             else
             {
                 statusCode = (int)HttpStatusCode.InternalServerError;

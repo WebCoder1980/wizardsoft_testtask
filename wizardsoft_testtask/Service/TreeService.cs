@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using wizardsoft_testtask.Data;
 using wizardsoft_testtask.Dtos;
+using wizardsoft_testtask.Exceptions;
 using wizardsoft_testtask.Models;
 
 namespace wizardsoft_testtask.Service
@@ -58,7 +59,7 @@ namespace wizardsoft_testtask.Service
                 parent = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == request.ParentId.Value, cancellationToken);
                 if (parent == null)
                 {
-                    throw new InvalidOperationException("Parent not found");
+                    throw new InvalidDataException("Parent not found");
                 }
             }
 
@@ -89,18 +90,18 @@ namespace wizardsoft_testtask.Service
             {
                 if (request.ParentId.Value == id)
                 {
-                    throw new InvalidOperationException("Node cannot be its own parent");
+                    throw new CircleInTreeException();
                 }
 
                 TreeNode? newParent = await _db.TreeNodes.FirstOrDefaultAsync(treeNode => treeNode.Id == request.ParentId.Value, cancellationToken);
                 if (newParent == null)
                 {
-                    throw new InvalidOperationException("Parent not found");
+                    throw new InvalidDataException("Parent not found");
                 }
 
                 if (await IsDescendantAsync(newParent.Id, node.Id, cancellationToken))
                 {
-                    throw new InvalidOperationException("Cyclic hierarchy is not allowed");
+                    throw new CircleInTreeException();
                 }
 
                 node.ParentId = newParent.Id;
